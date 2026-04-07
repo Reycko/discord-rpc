@@ -26,10 +26,23 @@ if (CLANG_FORMAT_CMD)
     )
 endif(CLANG_FORMAT_CMD)
 
-find_file(RAPIDJSON NAMES rapidjson PATHS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty CMAKE_FIND_ROOT_PATH_BOTH)
+macro(get_rapidjson)
+    find_file(RAPIDJSON NAMES rapidjson PATHS ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty CMAKE_FIND_ROOT_PATH_BOTH)
+endmacro(get_rapidjson)
+get_rapidjson()
 
 if (NOT RAPIDJSON)
-    message(FATAL_ERROR "rapidjson not found.\nyou can pull it with git submodule --update --init --recursive")
+    message("rapidjson not found, pulling submodules")
+    execute_process(
+        COMMAND git submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif(NOT RAPIDJSON)
+
+get_rapidjson()
+
+if (NOT RAPIDJSON)
+    message(FATAL_ERROR "rapidjson not found after pulling submodules")
 endif(NOT RAPIDJSON)
 
 add_library(rapidjson STATIC IMPORTED ${RAPIDJSON})
